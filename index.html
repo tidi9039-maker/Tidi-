@@ -1,318 +1,279 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Danh Thiếp Cá Nhân</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BUI TUNG DINH - Profile</title>
+  <meta name="color-scheme" content="light dark"/>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: #fff;
-      overflow-x: hidden;
+    :root{
+      --bg: linear-gradient(135deg,#e3f2fd,#bbdefb);
+      --card:#fff; --text:#222; --sub:#4a5568; --brand:#1e88e5; --ok:#4caf50;
+      --soft:#f3f7fb; --line:#dce7f7; --shadow:0 6px 20px rgba(0,0,0,.15);
+    }
+    .dark{
+      --bg: linear-gradient(135deg,#0b1220,#111827);
+      --card:#111827; --text:#e5e7eb; --sub:#9aa3b2; --brand:#60a5fa; --ok:#22c55e;
+      --soft:#0f172a; --line:#1f2937; --shadow:0 8px 24px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+      background:var(--bg); color:var(--text);
+      min-height:100vh; display:flex; justify-content:center; align-items:center; padding:18px;
+    }
+    main{
+      width:100%; max-width:980px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+      overflow:hidden; display:grid; grid-template-columns: 1fr 2fr; animation:fadeIn .6s ease;
+    }
+    @media (max-width: 820px){ main{grid-template-columns:1fr} }
+
+    /* Left panel */
+    .profile{
+      background: var(--brand);
+      color:#fff; text-align:center; padding:28px 20px; position:relative;
+    }
+    .avatar{width:140px;height:140px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.2);transition:.3s; opacity:1;}
+    .avatar:hover{transform:scale(1.05)}
+    .title{margin:12px 0 6px;font-size:22px;font-weight:700;letter-spacing:.3px}
+    .field{opacity:.95;margin-bottom:8px;font-weight:500}
+    .slogan{font-size:14px;opacity:.95}
+    .actions{margin-top:14px}
+    .btn{
+      border:0;border-radius:10px;padding:11px 16px; font-weight:700; cursor:pointer;
+      transition:.2s; box-shadow:0 4px 12px rgba(0,0,0,.15);
+    }
+    .btn-qr{background:#fff;color:var(--brand)}
+    .btn-qr:hover{transform:translateY(-1px); background:#eef4ff}
+
+    /* Right panel */
+    section{padding:22px 24px 28px 24px}
+    h3{margin:0 0 10px;font-size:18px}
+    .grid{display:flex; gap:10px; flex-direction:column}
+    .box{
+      background:var(--soft); border-left:4px solid var(--brand);
+      padding:12px 14px; border-radius:10px; cursor:pointer; transition:.2s;
+    }
+    .box:hover{filter:brightness(1.05); transform:translateY(-1px)}
+    .box a{color:inherit; text-decoration:none; font-weight:700}
+    .muted{color:var(--sub); font-size:14px}
+    .shake{animation:shake 1.6s infinite ease-in-out}
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}
+      10%{transform:translateX(-2px)} 20%{transform:translateX(2px)}
+      30%{transform:translateX(-2px)} 40%{transform:translateX(2px)}
+      50%{transform:translateX(0)}
+    }
+    .pulse{animation:pulse 1.6s infinite}
+    @keyframes pulse{
+      0%{box-shadow:0 0 0 0 rgba(34,197,94,.7)}
+      70%{box-shadow:0 0 0 12px rgba(34,197,94,0)}
+      100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}
     }
 
-    /* Thanh tiến độ khi cuộn */
-    #progressBar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 5px;
-      background: lime;
-      width: 0%;
-      z-index: 9999;
+    /* QR modal */
+    .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:50; align-items:center; justify-content:center}
+    .modal.on{display:flex}
+    .modal-card{
+      background:var(--card); border-radius:14px; padding:18px; width:min(92vw,360px); text-align:center;
+      box-shadow:0 14px 40px rgba(0,0,0,.3); animation:pop .25s ease;
     }
+    @keyframes pop{from{opacity:0; transform:scale(.9)} to{opacity:1; transform:scale(1)}}
+    .qr{width:100%; border-radius:12px; display:block; box-shadow:0 0 0 0 rgba(96,165,250,.9); animation:glow 2.2s infinite;}
+    @keyframes glow{
+      0%{box-shadow:0 0 0 0 rgba(96,165,250,.85)}
+      70%{box-shadow:0 0 28px 8px rgba(96,165,250,.15)}
+      100%{box-shadow:0 0 0 0 rgba(96,165,250,0)}
+    }
+    .close{position:absolute; top:16px; right:20px; color:#fff; font-size:32px; cursor:pointer}
 
-    .container {
-      text-align: center;
-      padding: 60px 20px;
-      position: relative;
-      z-index: 5;
-    }
+    /* Topbar */
+    .topbar{position:absolute; top:12px; right:12px; display:flex; gap:10px; align-items:center;}
+    .toggle{appearance:none; width:46px; height:26px; background:#e5e7eb; border-radius:999px; position:relative; outline:none; cursor:pointer; box-shadow: inset 0 0 0 2px #cbd5e1;}
+    .toggle:checked{background:#0ea5e9; box-shadow: inset 0 0 0 2px #0284c7}
+    .toggle:before{content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; background:#fff; border-radius:50%; transition:.2s;}
+    .toggle:checked:before{left:23px}
+    .share{border:0; padding:8px 12px; border-radius:999px; background:#fff; color:#111; cursor:pointer; font-weight:700; box-shadow:0 4px 10px rgba(0,0,0,.12);}
+    .share:hover{transform:translateY(-1px)}
 
-    /* Card lật 3D */
-    .card {
-      width: 200px;
-      height: 260px;
-      perspective: 1000px;
-      margin: auto;
+    /* Toast */
+    #toast{
+      position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+      background:var(--ok); color:#fff; padding:10px 16px; border-radius:10px; box-shadow:0 6px 16px rgba(0,0,0,.25);
+      font-weight:700; opacity:0; visibility:hidden; transition:.35s; z-index:60; font-size:14px;
     }
-    .card-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      text-align: center;
-      transition: transform 0.8s;
-      transform-style: preserve-3d;
-    }
-    .card:hover .card-inner {
-      transform: rotateY(180deg);
-    }
-    .card-front, .card-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border: 2px solid #0ff;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .card-front {
-      background: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-    .card-front img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 2px solid #0ff;
-    }
-    .card-back {
-      background: #222;
-      color: #0ff;
-      transform: rotateY(180deg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      font-size: 14px;
-    }
+    #toast.show{opacity:1; visibility:visible}
+    .footer{padding:14px; text-align:center; color:var(--sub); font-size:13px; border-top:1px solid var(--line)}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)}}
 
-    .name {
-      font-size: 28px;
-      font-weight: bold;
-      margin-top: 15px;
-      color: #0ff;
-      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px cyan;
-    }
-
-    .slogan {
-      font-size: 18px;
-      margin-top: 8px;
-      margin-bottom: 25px;
-      color: #fff;
-      text-shadow: 0 0 5px #f0f, 0 0 10px #f0f;
-    }
-
-    .btn {
-      display: inline-block;
-      margin: 10px;
-      padding: 12px 24px;
-      background: #111;
-      border: 1px solid #0ff;
-      border-radius: 6px;
-      color: #0ff;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-    }
-    .btn:hover {
-      background: #0ff;
-      color: #000;
-      transform: scale(1.05);
-    }
-
-    /* Canvas nền */
-    canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    /* Confetti */
-    .confetti {
-      position: fixed;
-      width: 10px; height: 10px;
-      background: red;
-      top: 0;
-      animation: fall 3s linear forwards;
-      z-index: 9999;
-    }
-    @keyframes fall {
-      to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-    }
+    /* Counter */
+    .counter{margin-top:10px;font-weight:700;font-size:15px;opacity:.9}
   </style>
 </head>
 <body>
-  <!-- Thanh tiến độ -->
-  <div id="progressBar"></div>
 
-  <!-- Canvas nền -->
-  <canvas id="stars"></canvas>
-  <canvas id="bubbles"></canvas>
-  <canvas id="particles"></canvas>
+  <!-- Close modal -->
+  <div class="close" id="closeModalBtn" title="Đóng" style="display:none;">×</div>
 
-  <div class="container">
-    <!-- Card 3D -->
-    <div class="card">
-      <div class="card-inner">
-        <div class="card-front">
-          <img src="https://i.ibb.co/7yzrCqJ/avatar.png" alt="Avatar">
-          <div class="name">Nguyễn Văn A</div>
-          <div class="slogan">Không ngừng thử thách, không ngừng kiếm tiền 🔥</div>
+  <main id="app">
+    <!-- LEFT -->
+    <aside class="profile">
+      <div class="topbar">
+        <button class="share" id="shareBtn">🔗 Chia sẻ</button>
+        <input id="themeToggle" class="toggle" type="checkbox" title="Dark mode"/>
+      </div>
+
+      <!-- Avatar -->
+      <img class="avatar" id="avatar" src="https://i.postimg.cc/Rhtj3r6r/Picsart-23-10-30-23-02-22-966-1.jpg" alt="Avatar" />
+
+      <div class="title">BUI TUNG DINH</div>
+      <div class="field">Lĩnh vực: MMO</div>
+      <div class="slogan">Không ngừng thử thách, không ngừng kiếm tiền 🔥</div>
+
+      <div class="counter">👁️ Lượt xem profile: <span id="views">0</span></div>
+      <div class="counter">📬 Người liên hệ: <span id="contacts">0</span></div>
+
+      <div class="actions">
+        <button class="btn btn-qr" id="openQR">Quét QR Ngân hàng</button>
+      </div>
+    </aside>
+
+    <!-- RIGHT -->
+    <section>
+      <h3>Thông tin liên hệ</h3>
+      <div class="grid">
+        <div class="box" onclick="openFB()">
+          📘 <b>Facebook</b><br>
+          <span class="muted">/share/172tYqNnnv</span>
         </div>
-        <div class="card-back">
-          Quét QR để kết nối nhanh 📱<br>
-          (Zalo / Facebook / Telegram)
+
+        <div class="box shake" onclick="copyAndOpenZalo()">
+          💬 <b>Zalo: <span id="zalo">0355932099</span></b><br>
+          <span class="muted">Bấm để mở chat & copy số</span>
+        </div>
+
+        <a class="box pulse" href="tel:0355932099">
+          📞 <b>Gọi ngay: 0355932099</b><br>
+          <span class="muted">Chạm để gọi</span>
+        </a>
+
+        <div class="box" onclick="copyBank()">
+          🏦 <b>Ngân hàng: MB Bank</b><br>
+          STK: <b id="stk">332426</b> — Chủ TK: <b>BUI DUC HAU</b><br>
+          <span class="muted">Bấm để copy toàn bộ thông tin</span>
         </div>
       </div>
-    </div>
 
-    <!-- Nút chức năng -->
-    <button class="btn" onclick="playSound();copyInfo()">📋 Copy Thông Tin</button>
+      <div class="footer">Made by BUI TUNG DINH – 2025</div>
+    </section>
+  </main>
 
-    <div>
-      <button class="btn" onclick="playSound();share('facebook')">📘 Facebook</button>
-      <button class="btn" onclick="playSound();share('zalo')">💬 Zalo</button>
-      <button class="btn" onclick="playSound();share('telegram')">📨 Telegram</button>
-      <button class="btn" onclick="playSound();share('link')">🔗 Copy Link</button>
+  <!-- MODAL QR -->
+  <div class="modal" id="qrModal">
+    <div class="modal-card">
+      <h3 style="margin:6px 0 10px">QR Ngân hàng MB Bank</h3>
+      <img id="qrImg" class="qr" src="https://img.vietqr.io/image/MB-332426-compact.png?accountName=BUI%20DUC%20HAU" alt="QR MB Bank"/>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:12px">
+        <a id="downloadQR" href="https://img.vietqr.io/image/MB-332426-compact.png?accountName=BUI%20DUC%20HAU" download="QR_MB_BANK.png">
+          <button class="btn">⬇️ Tải QR</button>
+        </a>
+        <button class="btn" onclick="copyQRLink()">🔗 Copy link QR</button>
+      </div>
     </div>
   </div>
 
-  <!-- Âm thanh -->
-  <audio id="sound-hover" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
-  <audio id="sound-click" src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1114.mp3"></audio>
+  <!-- Nhạc nền -->
+  <audio id="bgMusic" autoplay loop>
+    <source src="https://files.catbox.moe/ene1v4.mp3" type="audio/mpeg">
+  </audio>
+  <button id="musicControl" style="position:fixed;bottom:15px;left:15px;background:#2196f3;color:white;border:none;padding:10px 15px;border-radius:50%;font-size:18px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.2)">🔊</button>
+
+  <!-- TOAST -->
+  <div id="toast">👍 Thành công</div>
 
   <script>
-    // Âm thanh
-    function playSound(){
-      document.getElementById("sound-click").play();
-    }
-    document.querySelectorAll(".btn").forEach(btn=>{
-      btn.addEventListener("mouseenter", ()=>{
-        document.getElementById("sound-hover").play();
-      });
+    // ===== Avatar đổi mượt
+    const avatars = [
+      "https://i.postimg.cc/Rhtj3r6r/Picsart-23-10-30-23-02-22-966-1.jpg",
+      "https://i.postimg.cc/hQSCw51M/1000001196.jpg"
+    ];
+    let avatarIdx = 0;
+    const avatarEl = document.getElementById("avatar");
+    setInterval(()=>{
+      avatarEl.style.opacity = 0;
+      setTimeout(()=>{
+        avatarIdx = (avatarIdx+1)%avatars.length;
+        avatarEl.src = avatars[avatarIdx];
+        avatarEl.style.opacity = 1;
+      },1000);
+    },5000);
+
+    // ===== Nhạc nền
+    const music = document.getElementById("bgMusic");
+    const controlBtn = document.getElementById("musicControl");
+    let playing = true;
+    controlBtn.addEventListener("click", ()=>{
+      if(playing){ music.pause(); controlBtn.textContent="🔈"; }
+      else{ music.play(); controlBtn.textContent="🔊"; }
+      playing=!playing;
     });
 
-    // Copy info + confetti
-    function copyInfo(){
-      const text = "Facebook: fb.com/nguyenvana\nZalo: 0123456789\nTelegram: t.me/nguyenvana";
-      navigator.clipboard.writeText(text).then(()=>{
-        launchConfetti();
-        alert("✅ Đã copy toàn bộ thông tin!");
-      });
+    // ===== Toast
+    function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+
+    // ===== CountAPI lượt xem thật
+    const viewsEl = document.getElementById('views');
+    fetch('https://api.countapi.xyz/hit/buitungdinh/profile')
+      .then(res=>res.json())
+      .then(data=>{ viewsEl.textContent=data.value; })
+      .catch(err=>console.error('CountAPI lỗi',err));
+
+    // ===== Người liên hệ
+    let contacts = 0;
+    const contactsEl = document.getElementById('contacts');
+    function copyAndOpenZalo(){
+      contacts++; contactsEl.textContent=contacts;
+      navigator.clipboard.writeText('0355932099').then(()=> toast('✅ Đã copy số Zalo!'));
+      window.open('https://zalo.me/0355932099','_blank');
     }
 
-    // Confetti
-    function launchConfetti(){
-      for(let i=0;i<30;i++){
-        const conf=document.createElement("div");
-        conf.classList.add("confetti");
-        conf.style.left=Math.random()*100+"vw";
-        conf.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
-        document.body.appendChild(conf);
-        setTimeout(()=>conf.remove(),3000);
-      }
-    }
+    // ===== Copy bank
+    function copyBank(){ const txt='MB Bank - STK: 332426 - Chủ TK: BUI DUC HAU'; navigator.clipboard.writeText(txt).then(()=> toast('✅ Đã copy thông tin ngân hàng!')); }
 
-    // Share
-    function share(platform){
-      let url="";
-      if(platform==="facebook") url="https://facebook.com/sharer/sharer.php?u=https://yourlink.com";
-      if(platform==="zalo") url="https://zalo.me/0123456789";
-      if(platform==="telegram") url="https://t.me/share/url?url=https://yourlink.com&text=Danh+thiếp+của+tôi";
-      if(platform==="link"){navigator.clipboard.writeText("https://yourlink.com"); alert("🔗 Link đã copy!"); return;}
-      window.open(url, "_blank");
-    }
+    // ===== QR Modal
+    const qrModal = document.getElementById('qrModal');
+    const openQR = document.getElementById('openQR');
+    const closeX = document.getElementById('closeModalBtn');
+    openQR.addEventListener('click',()=>{ qrModal.classList.add('on'); closeX.style.display='block'; });
+    closeX.addEventListener('click',()=>{ qrModal.classList.remove('on'); closeX.style.display='none'; });
+    window.addEventListener('click',(e)=>{ if(e.target===qrModal){ qrModal.classList.remove('on'); closeX.style.display='none'; }});
+    function copyQRLink(){ const link=document.getElementById('qrImg').src; navigator.clipboard.writeText(link).then(()=>toast('✅ Đã copy link QR!')); }
 
-    // Thanh tiến độ khi cuộn
-    window.onscroll = function(){
-      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-      let scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      let percent = (scrollTop/scrollHeight) * 100;
-      document.getElementById("progressBar").style.width = percent + "%";
-    };
-
-    /* =============== NỀN SAO (Night sky) =============== */
-    const stars = document.getElementById("stars");
-    const stx = stars.getContext("2d");
-    stars.width=window.innerWidth; stars.height=window.innerHeight;
-    let starArr=[];
-    for(let i=0;i<200;i++){
-      starArr.push({x:Math.random()*stars.width,y:Math.random()*stars.height,r:Math.random()*2});
-    }
-    function drawStars(){
-      stx.clearRect(0,0,stars.width,stars.height);
-      stx.fillStyle="white";
-      starArr.forEach(s=>{
-        stx.beginPath();
-        stx.arc(s.x,s.y,s.r,0,Math.PI*2);
-        stx.fill();
-      });
-      requestAnimationFrame(drawStars);
-    }
-    drawStars();
-
-    /* =============== BONG BÓNG NỔI =============== */
-    const bubbles=document.getElementById("bubbles");
-    const btx=bubbles.getContext("2d");
-    bubbles.width=window.innerWidth; bubbles.height=window.innerHeight;
-    let bubbleArr=[];
-    class Bubble{
-      constructor(){
-        this.x=Math.random()*bubbles.width;
-        this.y=bubbles.height+Math.random()*100;
-        this.r=Math.random()*8+2;
-        this.speed=Math.random()*1+0.5;
-      }
-      update(){ this.y-=this.speed; if(this.y<-10) this.y=bubbles.height; }
-      draw(){
-        btx.beginPath();
-        btx.arc(this.x,this.y,this.r,0,Math.PI*2);
-        btx.fillStyle="rgba(0,200,255,0.4)";
-        btx.fill();
-      }
-    }
-    for(let i=0;i<50;i++){bubbleArr.push(new Bubble());}
-    function animateBubbles(){
-      btx.clearRect(0,0,bubbles.width,bubbles.height);
-      bubbleArr.forEach(b=>{b.update(); b.draw();});
-      requestAnimationFrame(animateBubbles);
-    }
-    animateBubbles();
-
-    /* =============== PARTICLE FOLLOW =============== */
-    const particles=document.getElementById("particles");
-    const ctx=particles.getContext("2d");
-    particles.width=window.innerWidth; particles.height=window.innerHeight;
-    let particleArr=[];
-    class Particle{
-      constructor(x,y){
-        this.x=x; this.y=y;
-        this.size=Math.random()*5+2;
-        this.speedX=Math.random()*3-1.5;
-        this.speedY=Math.random()*3-1.5;
-      }
-      update(){this.x+=this.speedX; this.y+=this.speedY; if(this.size>0.2) this.size-=0.1;}
-      draw(){
-        ctx.fillStyle="rgba(0,255,255,0.7)";
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
-        ctx.fill();
-      }
-    }
-    function handleParticles(){
-      for(let i=0;i<particleArr.length;i++){
-        particleArr[i].update(); particleArr[i].draw();
-        if(particleArr[i].size<=0.3){particleArr.splice(i,1); i--;}
-      }
-    }
-    function animateParticles(){
-      ctx.clearRect(0,0,particles.width,particles.height);
-      handleParticles();
-      requestAnimationFrame(animateParticles);
-    }
-    animateParticles();
-    window.addEventListener("mousemove",(e)=>{for(let i=0;i<5;i++){particleArr.push(new Particle(e.x,e.y));}});
-    window.addEventListener("resize",()=>{
-      stars.width=bubbles.width=particles.width=window.innerWidth;
-      stars.height=bubbles.height=particles.height=window.innerHeight;
+    // ===== Share Card
+    const shareBtn = document.getElementById('shareBtn');
+    shareBtn.addEventListener('click', async ()=>{
+      const url = window.location.href;
+      const text = "Danh thiếp số của BUI TUNG DINH";
+      const title = "BUI TUNG DINH - Profile";
+      if(navigator.share){
+        try{ await navigator.share({title,text,url}); }catch(e){}
+      }else{ navigator.clipboard.writeText(url).then(()=>toast("🔗 Đã copy link trang!")); }
     });
+
+    // ===== Dark mode toggle
+    const toggle = document.getElementById('themeToggle');
+    const root = document.documentElement;
+    function applyTheme(){
+      const m = localStorage.getItem('theme')||'light';
+      if(m==='dark'){ root.classList.add('dark'); toggle.checked=true; }
+      else{ root.classList.remove('dark'); toggle.checked=false; }
+    }
+    toggle.addEventListener('change',()=>{ const mode = toggle.checked?'dark':'light'; localStorage.setItem('theme',mode); applyTheme(); });
+    applyTheme();
+
+    // ===== Facebook
+    function openFB(){ window.open("https://www.facebook.com/share/172tYqNnnv/","_blank"); }
   </script>
 </body>
 </html>
